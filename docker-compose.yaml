@@ -1,15 +1,58 @@
 services:
-  wordpress:
-    build: .
-    container_name: wordpress
+  db:
+    image: mysql:8.4
+    container_name: wp-db
     ports:
     # Exposes the ports so the container is reachable from the network
       - "8081:25565"
     environment:
+      - MYSQL_DATABASE
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      - MYSQL_ROOT_PASSWORD
     
     volumes:
-      - wordpress-data:/app
+    # Persist the db files on the host
+      - db-data:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - wp-net
+    # Checks to see if the db is up and running before trying to connect wordpress to it to avoid "Error establishing a database connection" on first boot
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  wordpress:
+    image: wordpress:6-php8.3-apache
+    container_name: wordpress
+    ports:
+    # Exposes the ports so the container is reachable from the network; host:8080 -> container:80
+      - "8080:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - WORDPRESS_DB_HOST=db:3306
+      - WORDPRESS_DB_NAME
+      - WORDPRESS_DB_USER
+      - WORDPRESS_DB_PASSWORD
+      - WORDPRESS_TABLE_PREFIX=wp_
+      - WORDPRESS_DEBUG=0
+    networks:
+      - wp-net
+    volumes:
+    # Persist uploads, themes, plugins and config
+      - wordpress-data:/var/www/html
     restart: unless-stopped
 
 volumes:
+# these named volumes are managed by Docker and stored on the host file system to allow the service to be stopped and started without losing any data.
   wordpress-data: {}
+  db-data: {}
+
+networks:
+  wp-net:
+    driver: bridge
