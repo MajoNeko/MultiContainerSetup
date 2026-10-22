@@ -1,0 +1,15 @@
+services:
+  wordpress:
+    build: .
+    container_name: wordpress
+    ports:
+    # Exposes the ports so the container is reachable from the network
+      - "8081:25565"
+    environment:
+    
+    volumes:
+      - wordpress-data:/app
+    restart: unless-stopped
+
+volumes:
+  wordpress-data: {}
