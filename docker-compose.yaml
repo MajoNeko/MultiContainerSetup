@@ -2,9 +2,6 @@ services:
   db:
     image: mysql:8.4
     container_name: wp-db
-    ports:
-    # Exposes the ports so the container is reachable from the network
-      - "8081:25565"
     environment:
       - MYSQL_DATABASE
       - MYSQL_USER
