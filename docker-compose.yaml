@@ -27,7 +27,7 @@ services:
     container_name: wordpress
     ports:
     # Exposes the ports so the container is reachable from the network; host:8080 -> container:80
-      - "8080:80"
+      - "${WP_PORT}:80"
     depends_on:
       db:
         condition: service_healthy
@@ -36,8 +36,8 @@ services:
       - WORDPRESS_DB_NAME
       - WORDPRESS_DB_USER
       - WORDPRESS_DB_PASSWORD
-      - WORDPRESS_TABLE_PREFIX=wp_
-      - WORDPRESS_DEBUG=0
+      - WORDPRESS_TABLE_PREFIX
+      - WORDPRESS_DEBUG
     networks:
       - wp-net
     volumes:
