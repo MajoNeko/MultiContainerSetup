@@ -32,7 +32,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      - WORDPRESS_DB_HOST
+      - WORDPRESS_DB_HOST=db:3306
       - WORDPRESS_DB_NAME
       - WORDPRESS_DB_USER
       - WORDPRESS_DB_PASSWORD
